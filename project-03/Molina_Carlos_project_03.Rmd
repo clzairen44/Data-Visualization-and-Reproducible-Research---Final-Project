@@ -1,0 +1,238 @@
+---
+title: "Data Visualization for Exploratory Data Analysis"
+output: 
+  html_document:
+    keep_md: true
+    toc: true
+    toc_float: true
+---
+
+# Data Visualization Project 03
+
+
+In this exercise, I explored methods to create different types of data visualizations (such as plotting text data, or exploring the distributions of continuous variables).
+
+
+## PART 1: Density Plots
+
+Using the dataset obtained from FSU's [Florida Climate Center](https://climatecenter.fsu.edu/climate-data-access-tools/downloadable-data), for a station at Tampa International Airport (TPA) for 2022. These are my plots (the ones below) that will mirror the following provided plots:
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(lubridate)
+library(ggridges)
+library(viridis)
+
+weather_tpa <- read_csv("https://raw.githubusercontent.com/aalhamadani/datasets/master/tpa_weather_2022.csv")
+# random sample 
+sample_n(weather_tpa, 4)
+
+weather_tpa <- weather_tpa %>%   ## Takes the dataset "weather_tpa" and passes it to the next function and the makes the code more readable 
+  mutate(
+    DATE = as.Date(paste(year, month, day, sep = "-")),
+    MONTH = factor(month, labels = month.abb)
+  )
+
+```
+
+Using the 2022 data: 
+
+(a) Create a plot like the one below:
+
+```{r, echo = FALSE, out.width="80%", fig.align='center'}
+knitr::include_graphics("https://raw.githubusercontent.com/aalhamadani/dataviz_final_project/main/figures/tpa_max_temps_facet.png")
+
+weather_tpa %>%    ## Takes the dataset "weather_tpa" and passes it to the next function and the makes the code more readable 
+  filter(max_temp > -50) %>%
+  ggplot(aes(x = max_temp)) +
+  geom_histogram(binwidth = 3, fill = "#7222EE", color = "black") +
+  facet_wrap(~MONTH) +
+  labs(
+    title = "Monthly Distribution of Maximum Temperature (TPA 2022)",
+    x = "Maximum Temperatures",
+    y = "Number of Days"
+  ) +
+  theme_minimal()
+
+
+
+```
+
+(b) Create a plot like the one below:
+
+```{r, echo = FALSE, out.width="80%", fig.align='center'}
+knitr::include_graphics("https://raw.githubusercontent.com/aalhamadani/dataviz_final_project/main/figures/tpa_max_temps_density.png")
+
+weather_tpa %>%    ## Takes the dataset "weather_tpa" and passes it to the next function and the makes the code more readable 
+  filter(max_temp > -60) %>%
+  ggplot(aes(x = max_temp, color = MONTH)) +
+  geom_density(bw = 0.5, linewidth = 2) +
+  scale_color_viridis_d(option = "plasma") + 
+  labs(
+    title = "Density of Maximum Temperature by Month (TPA 2022)",
+    x = "Max Temperature",
+    y = "Density"
+  ) +
+  theme_minimal()
+
+
+```
+
+(c) Create a plot like the one below:
+
+```{r, echo = FALSE, out.width="80%", fig.align='center'}
+knitr::include_graphics("https://raw.githubusercontent.com/aalhamadani/dataviz_final_project/main/figures/tpa_max_temps_density_facet.png")
+
+weather_tpa %>%   ## Takes the dataset "weather_tpa" and passes it to the next function and the makes the code more readable 
+  filter(max_temp > -50) %>%
+  ggplot(aes(x = max_temp)) +
+  geom_density(fill = "lightgreen", alpha = 0.5) +
+  facet_wrap(~MONTH) +
+  labs(
+    title = "Monthly Density of Maximum Temperature (TPA 2022)",
+    x = "Max Temperature",
+    y = "Density"
+  ) +
+  theme_minimal()
+
+```
+
+Hint: default options for `geom_density()` were used. 
+
+(d) Generate a plot like the chart below:
+
+
+```{r, echo = FALSE, out.width="80%", fig.align='center'}
+knitr::include_graphics("https://raw.githubusercontent.com/aalhamadani/dataviz_final_project/main/figures/tpa_max_temps_ridges_plasma.png")
+
+library(ggridges)
+
+weather_tpa %>%       ## Takes the dataset "weather_tpa" and passes it to the next function and the makes the code more readable 
+  filter(max_temp > -50) %>%
+  ggplot(aes(x = max_temp, y = MONTH, fill = MONTH)) +
+  geom_density_ridges(
+    quantile_lines = TRUE,
+    quantiles = c(0.25, 0.5, 0.75),
+    alpha = 0.8
+  ) +
+  scale_fill_viridis_d(option = "plasma") +
+  labs(
+    title = "Distribution of Maximum Temperatures by Month (TPA 2022)",
+    x = "Maximum Temperature",
+    y = "Month"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+```
+
+(e) Create a plot of your choice that uses the attribute for precipitation _(values of -99.9 for temperature or -99.99 for precipitation represent missing data)_.
+
+```{r, echo = FALSE, out.width="80%", fig.align='center'}
+
+weather_tpa %>%
+  filter(precipitation > -50) %>%
+  group_by(MONTH) %>%
+  summarise(total_precip = sum(precipitation, na.rm = TRUE)) %>%
+  ggplot(aes(x = MONTH, y = total_precip)) +
+  geom_col(fill = "royalblue") +
+  labs(
+    title = "Total Monthly Precipitation (TPA 2022)",
+    x = "Month",
+    y = "Total Precipitation"
+  ) +
+  theme_minimal()
+
+```
+
+## PART 2 
+
+> **You can choose to work on either Option (A) or Option (B)**. Remove from this template the option you decided not to work on. 
+
+### Option (B): Data on Concrete Strength 
+
+Concrete is the most important material in **civil engineering**. The concrete compressive strength is a highly nonlinear function of _age_ and _ingredients_. The dataset used here is from the [UCI Machine Learning Repository](https://archive.ics.uci.edu/ml/index.php), and it contains 1030 observations with 9 different attributes 9 (8 quantitative input variables, and 1 quantitative output variable). A data dictionary is included below: 
+
+
+Variable                      |    Notes                
+------------------------------|-------------------------------------------
+Cement                        | kg in a $m^3$ mixture             
+Blast Furnace Slag            | kg in a $m^3$ mixture  
+Fly Ash                       | kg in a $m^3$ mixture             
+Water                         | kg in a $m^3$ mixture              
+Superplasticizer              | kg in a $m^3$ mixture
+Coarse Aggregate              | kg in a $m^3$ mixture
+Fine Aggregate                | kg in a $m^3$ mixture      
+Age                           | in days                                             
+Concrete compressive strength | MPa, megapascals
+
+
+Below we read the `.csv` file using `readr::read_csv()` (the `readr` package is part of the `tidyverse`)
+
+```{r}
+setwd("~/Florida Polytechnic University/Data Visualization and Reproducible Research/Dataviz_Final_Project-Main-Carlos_Molina/data") 
+
+concrete <- read_csv("concrete.csv", col_types = cols())
+
+```
+Let us create a new attribute for visualization purposes, `strength_range`: 
+
+```{r}
+new_concrete <- concrete %>%
+  mutate(strength_range = cut(Concrete_compressive_strength, 
+                              breaks = quantile(Concrete_compressive_strength, 
+                                                probs = seq(0, 1, 0.2))) )
+```
+
+1. Explore the distribution of 2 of the continuous variables available in the dataset. Do ranges make sense? Comment on your findings.
+
+I decided to explore the distributions for water and cement. The distribution of water content appears to be narrow and concentrated with most observations located within a small range. This reflects the engineering constraint that water-to-cement ratio is carefully controlled in concrete designs, since even small variations in water content can significantly affect the use of concrete in different constructions projects and their final compressive strength for the builds. 
+
+The distribution of cement is skewed to the right which indicates that most concrete mixtures use moderate quantities of cement. There are a few mixtures that have high cement concentrations, but these do not drastically affect the distribution. C ement usage is not uniformly distributed across all mixes, but instead varies depending on performance requirements. Overall, the ranges for both variables are reasonable and consistent with real-world concrete engineering practices, where cement proportions vary based on strength requirements, while water content is more strictly regulated.
+
+
+2. Use a _temporal_ indicator such as the one available in the variable `Age` (measured in days). Generate a plot similar to the one shown below. Comment on your results.
+
+```{r, echo = FALSE, out.width="80%", fig.align='center'}
+knitr::include_graphics("https://raw.githubusercontent.com/aalhamadani/dataviz_final_project/main/figures/concrete_strength.png")
+
+ggplot(concrete, aes(x = Age, y = Concrete_compressive_strength)) +
+  geom_point(alpha = 0.6, color = "darkgreen") +
+  geom_smooth(method = "loess", se = TRUE, color = "black") +      ##Adds trend line to clearly show the relationship between the variables instead of a simple straight line
+  scale_x_log10() +
+  labs(title = "Concrete Strength vs Age",
+       x = "Age (in days)",
+       y = "Compressive Strength") +
+  theme_minimal()
+
+```
+This scatterplot shows a clear positive relationship between concrete age and compressive strength, specially during the early curing period. Strength increases rapidly in the first few days to weeks, which reflects the hydration process where cement particles react with water and form stronger bonds within the material.
+
+However, after approximately 50–100 days, the rate of strength gain begins to slow down significantly, indicating diminishing returns over time. This downward trend is consistent with established civil engineering principles like the one says that most of the structural strength of concrete develops early, and long-term curing results in only marginal improvements.
+
+The use of a log scale on the x-axis helps reveal this nonlinear relationship more clearly, especially the steep early growth phase. The smoothing line confirms that the relationship is not linear but follows a logarithmic-like saturation pattern. Concrete shows a rapid early curing process followed by gradual stabilization of strength over time.
+
+
+3. Create a scatterplot similar to the one shown below. Pay special attention to which variables are being mapped to specific aesthetics of the plot. Comment on your results. 
+
+```{r, echo = FALSE, out.width="80%", fig.align='center'}
+knitr::include_graphics("https://raw.githubusercontent.com/aalhamadani/dataviz_final_project/main/figures/cement_plot.png")
+
+ggplot(new_concrete, aes(x = Cement, y = Concrete_compressive_strength, color = strength_range)) + ## Defines the plot structure, the aesthetics, and the variables assigned to the x and y axis, and sets the points to be colored based on "strength" 
+  geom_point(alpha = 0.7, size = 2) +           ##Adds the data points creating the scatterplot
+  scale_color_brewer(palette = "YlOrRd") +
+  labs(title = "Concrete Strength vs Cement Content",
+       x = "Cement",
+       y = "Compressive Strength",
+       color = "Strength Range") +
+  theme_minimal()
+
+```
+This scatterplot between cement content and compressive strength shows a generally positive relationship, meaning that higher cement content tends to correspond to stronger concrete. This aligns with fundamental mix design principles, because cement is the primary binding agent responsible for strength development in most building structure.
+
+However, there is noticeable vertical spread at nearly all cement levels. This indicates that cement alone does not fully determine strength. There are other variables such as water content, slag, fly ash, and superplasticizer that also play a significant role in influencing the final product.
+
+The use of strength range coloring helps reveal additional structure in the data. Lower cement levels are dominated by lower-strength categories, while higher cement values are more frequently associated with medium to high strength ranges. Concrete strength is a multivariate and nonlinear process rather than a single-variable dependency.
+
+
+
