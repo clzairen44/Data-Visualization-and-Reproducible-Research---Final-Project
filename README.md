@@ -1,5 +1,3 @@
-# Data-Visualization-and-Reproducible-Research---Final-Project
-
 # Data Visualization and Reproducible Research
 
 > Carlos Luis Molina Montero
@@ -97,5 +95,4 @@ Some of these things I want to focus on the future are:
 - Investigating additional environmental variables (humidity, wind speed) to improve weather-based insights.
 
 - Potentially learn how to use other types of software to make more data visualizations or deeper analysis of the dataset.
-
 
