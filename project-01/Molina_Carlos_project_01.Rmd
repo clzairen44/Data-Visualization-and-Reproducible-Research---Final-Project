@@ -1,0 +1,124 @@
+---
+title: "Mini-Project 01"
+output: 
+  html_document:
+    keep_md: true
+    toc: true
+    toc_float: true
+---
+
+# Data Visualization Project 01
+
+This was favorite plot from project 1 that I did previously. It was updated and improved by transforming the previous static scatterplot into an interactive time-series visualization using Plotly. It allows users to hover over individual years to view the exact number of US births for each year. By including the colorblind-safe viridis palette, the accessibility of this plot was increased significantly. This plot effectively displays long term pattern of US Births within the specific time period of dataset which is 2000 to 2014. 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(plotly)
+library(viridis)
+library(tidyverse)
+library(lubridate)
+library(ggplot2)
+
+#Download Dataset of us_births_00_14.csv
+
+setwd("~/Florida Polytechnic University/Data Visualization and Reproducible Research/Dataviz_Final_Project-Main-Carlos_Molina/data") 
+
+USBirths <- read_csv("us_births_00_14.csv")
+
+glimpse(USBirths)    #Make a quick check of the data to see how it is organized. 
+names(USBirths)      #Display all columns of the dataset to know how many variables are inside of this dataset.
+
+#Create and assign 3 sub-datasets from the original us_births_00_14.csv dataset
+#Each of these will be used to create a data visualization to understand this dataset better: 
+# US_Births_Each_Year, US_Births_Each_Month, and US_Births_Each_Day_Per_Month sub-datasets.
+
+US_Births_Each_Year <- USBirths %>%
+  group_by(year) %>%
+  summarize(Total_Births = sum(births))
+
+
+##########################################################################################################
+```
+
+- BEFORE IMPROVEMENT:
+
+```{r, echo=FALSE} 
+
+###################################### BEFORE THE IMPROVEMENT / OLD DATA VISUALIZATION
+
+ggplot(US_Births_Each_Year,
+       aes(x = year,
+           y = Total_Births)) +
+  geom_point(size = 5,
+             color = "green") +
+   geom_line(color = "lightgreen", #Added a line that fits connects the points to show a clear pattern of the data
+            linewidth = 1) +
+  labs(
+    title = "Total U.S. Births Each Year",
+    x = "Year"  ) +
+  
+ theme_minimal() +
+  theme(axis.title.y = element_blank() ,  # Remove the y-axis label to improve effectiveness of this scatterplot
+        panel.background = element_rect(fill = "gray95", color = NA)   #Made the background color gray thanks to the recommendations from the Glamour of Graphics
+        ) +
+  theme(legend.position = "left", plot.title = element_text(hjust = -0.15))
+
+```
+
+
+
+- AFTER IMPROVEMENT, NOW IT IS AN INTERACTIVE DATA VISUALIZATION:
+
+
+
+```{r, echo=FALSE} 
+
+###################################### AFTER THE IMPROVEMENT / NEW DATA VISUALIZATION
+
+birth_trend_plot <- ggplot(
+  US_Births_Each_Year,
+  aes(
+    x = year,
+    y = Total_Births,
+    text = paste(
+      "Year:", year,
+      "<br>Total Births:", Total_Births
+    )
+  )
+) +
+  geom_point(
+    aes(color = Total_Births),
+    size = 5
+  ) +
+  geom_line(
+    color = "gray40",
+    linewidth = 1
+  ) +
+  scale_color_viridis_c(
+    option = "D",
+    name = "Birth Count"
+  ) +
+  labs(
+    title = "Total U.S. Births Each Year",
+    x = "Year",
+    y = "Total Births"
+  ) +
+  theme_minimal() +
+  theme(
+    panel.background = element_rect(
+      fill = "gray95",
+      color = NA
+    ),
+    plot.title = element_text(hjust = 0.5),
+    legend.position = "right"
+  )
+
+
+# Convert ggplot into an interactive plot
+ggplotly(
+  birth_trend_plot,
+  tooltip = "text"
+)
+
+```
