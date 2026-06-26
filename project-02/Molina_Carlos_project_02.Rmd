@@ -1,0 +1,79 @@
+---
+title: "Mini-Project 02"
+output: 
+  html_document:
+    keep_md: true
+    toc: true
+    toc_float: true
+---
+
+# Data Visualization Project 02
+
+This is an improved version of the heatmap visualization I made previously for Project 2. It was converted from a static heatmap into an interactive visualization where users can hover over each individual cell that shows the exact number of US Births for the specific month and day within the provided dataset. This heatmap uses the colorblind-safe viridis gradient which increases its accessibility. This data visualization is effective in displaying seasonal and daily patterns for US births for the time period of 2000 to 2014 and provides a cleaner picture of how births are distributed throughout the year. 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+##Include libraries and setup visualizations
+
+library(tidyverse)
+library(plotly)
+library(sf)
+library(viridis)
+library(ggplot2)
+
+setwd("~/Florida Polytechnic University/Data Visualization and Reproducible Research/Dataviz_Mini-Project_2_Carlos_Molina/data") 
+
+births <- read_csv("us_births_00_14.csv")
+
+birth_heatmap <- births %>%
+  group_by(month, date_of_month) %>%
+  summarize(total_births = sum(births))
+
+lakes <- st_read("Florida_Lakes_Shapefiles/Florida_Lakes/Florida_Lakes.shp")
+
+```
+
+```{r, echo=FALSE} 
+
+birth_heatmap_plot <- ggplot(
+  birth_heatmap,
+  aes(
+    x = month,
+    y = date_of_month,
+    fill = total_births,
+    text = paste(
+      "Month:", month,
+      "<br>Day:", date_of_month,
+      "<br>Total Births:", total_births
+    )
+  )
+) +
+  geom_tile() +
+  scale_fill_viridis_c(
+    option = "C",
+    name = "Birth Count"
+  ) +
+  labs(
+    title = "Interactive Heatmap of U.S. Births by Month and Day",
+    x = "Month",
+    y = "Day of Month"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5)
+  )
+
+
+# Convert to interactive heatmap
+ggplotly(
+  birth_heatmap_plot,
+  tooltip = "text"
+  
+  
+)
+
+
+```
+
+
